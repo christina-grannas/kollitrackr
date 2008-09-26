@@ -1,52 +1,52 @@
 #!/bin/bash
-# Söka kolli på posten.se
+# Track packages from posten.se
 
 
-kolliid=$1
-programnamn=$0
+tracking_number=$1
+app_name=$0
 
 
-#Kontrollera att kolli-id är angett:
+# Check that a tracking number is provided
 
-if [ ! $kolliid ]
+if [ ! $tracking_number ]
 	then
 		echo "Ange kolli-id som argument!"
-		echo "Exempel:" $programnamn "[kolli-id]"
+		echo "Exempel:" $app_name "[kolli-id]"
 		exit
 		echo "Om denna text syns, så är det fel nånstans."
 
 	else
-		echo "Spårar kolli" $1 "via posten.se..."
+		echo "Spårar kolli" $tracking_number "via posten.se..."
 fi
 
 
-# Hämta (temporär) html-fil från posten.se, $kolliid angett i url:
-wget -qO $1.html "http://www.posten.se/tracktrace/TrackConsignments_do.jsp?trackntraceAction=saveSearch&logisticCustomerNumber=&referenceNumber=&lang=SE&loginHandlerImplClass=se.posten.pse.framework.security.applicationImpl.tracktrace.LoginHandlerImpl&internalPageNumber=0&doNotShowInHistory=true&consignmentId=$kolliid&consignmentId=&consignmentId=&consignmentId=&consignmentId=&consignmentId=&consignmentId=&consignmentId="
+# Get html from posten.se by tracking_number and save it to a file
+wget -qO $tracking_number.html "http://www.posten.se/tracktrace/TrackConsignments_do.jsp?trackntraceAction=saveSearch&logisticCustomerNumber=&referenceNumber=&lang=SE&loginHandlerImplClass=se.posten.pse.framework.security.applicationImpl.tracktrace.LoginHandlerImpl&internalPageNumber=0&doNotShowInHistory=true&consignmentId=$tracking_number&consignmentId=&consignmentId=&consignmentId=&consignmentId=&consignmentId=&consignmentId=&consignmentId="
 
-# Spara info om kollit i $1.kolli:
-# rm $1.kolli
-echo "ID:  " $1 > $1.kolli
-echo -ne "Från: " >> $1.kolli
-grep 'Fr&aring;n:' ./$1.html | sed 's/\///g' | sed 's/<[^>]*>//g' | sed 's/Fr&aring;n://g' | sed 's/^ *//g' | sed '/^$/d' >> $1.kolli 
-echo -ne "Till: " >> $1.kolli
-grep 'Till:' ./$1.html | sed 's/\///g' | sed 's/<[^>]*>//g' | sed 's/Till://g' | sed 's/&nbsp;//g' | sed 's/^ *//g' | sed '/^$/d' >> $1.kolli
-echo -ne "Vikt: " >> $1.kolli
-grep 'Vikt:' ./$1.html | sed 's/\///g' | sed 's/<[^>]*>//g' | sed 's/Vikt://g' | sed 's/^ *//g' | sed '/^$/d' >> $1.kolli
-echo -ne "Typ:  " >> $1.kolli
-grep 'Typ av f&ouml;rs&auml;ndelse:' ./$1.html | sed 's/\///g' | sed 's/<[^>]*>//g' | sed 's/Typ av f&ouml;rs&auml;ndelse://g' | sed 's/^ *//g' | sed '/^$/d' >> $1.kolli
-echo  >> $1.kolli
+# Save tracking history in $tracking_number.kolli:
+# rm $tracking_number.kolli
+echo "ID:  " $tracking_number > $tracking_number.kolli
+echo -ne "Från: " >> $tracking_number.kolli
+grep 'Fr&aring;n:' ./$tracking_number.html | sed 's/\///g' | sed 's/<[^>]*>//g' | sed 's/Fr&aring;n://g' | sed 's/^ *//g' | sed '/^$/d' >> $tracking_number.kolli 
+echo -ne "Till: " >> $tracking_number.kolli
+grep 'Till:' ./$tracking_number.html | sed 's/\///g' | sed 's/<[^>]*>//g' | sed 's/Till://g' | sed 's/&nbsp;//g' | sed 's/^ *//g' | sed '/^$/d' >> $tracking_number.kolli
+echo -ne "Vikt: " >> $tracking_number.kolli
+grep 'Vikt:' ./$tracking_number.html | sed 's/\///g' | sed 's/<[^>]*>//g' | sed 's/Vikt://g' | sed 's/^ *//g' | sed '/^$/d' >> $tracking_number.kolli
+echo -ne "Typ:  " >> $tracking_number.kolli
+grep 'Typ av f&ouml;rs&auml;ndelse:' ./$tracking_number.html | sed 's/\///g' | sed 's/<[^>]*>//g' | sed 's/Typ av f&ouml;rs&auml;ndelse://g' | sed 's/^ *//g' | sed '/^$/d' >> $tracking_number.kolli
+echo  >> $tracking_number.kolli
 
-echo "Tidpunkt          Händelse" >> $1.kolli
+echo "Tidpunkt          Händelse" >> $tracking_number.kolli
 
-# Sortera ut relevant textoch spara i $1.kolli:
-grep 'Historik' ./$1.html | sed 's/<tr>/\
-/g' |  sed 's/<\/td>/   /g' | sed 's/<[^>]*>//g' | sed 's/Historik://g' | sed 's/DatumMeddelande//g' | sed 's/[,]//g' | sed '/^$/d' >> $1.kolli
+# Grep relevant information and save it to $tracking_number.kolli:
+grep 'Historik' ./$tracking_number.html | sed 's/<tr>/\
+/g' |  sed 's/<\/td>/   /g' | sed 's/<[^>]*>//g' | sed 's/Historik://g' | sed 's/DatumMeddelande//g' | sed 's/[,]//g' | sed '/^$/d' >> $tracking_number.kolli
 
-# Visa filen $1.kolli
+# Display the file $tracking_number.kolli
 echo
-cat $1.kolli
+cat $tracking_number.kolli
 echo
 
-# Tag bort den temporära html-filen som hämtats från posten.se:
-rm ./$1.html
+# Remove the temporaty html file
+rm ./$tracking_number.html
 
