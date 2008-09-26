@@ -2,4 +2,4 @@ kollitrackr is my first try at making a bash script and using github.
 
 Provide it with a tracking number from the Swedish postal service and it will scrape posten.se for information about where the package is located, print it in the terminal and save the information to a file: [tracking-id].kolli
 
-Code contributions by Azghoul. :)
+Developed by me and Azghoul! :)
